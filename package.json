@@ -1,0 +1,23 @@
+{
+  "name": "nc-cluster",
+  "version": "0.0.0",
+  "description": "Simple and powerful helper for the inbuilt cluster module",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idleman/node-nc-cluster.git"
+  },
+  "keywords": [
+    "cluster",
+    "master",
+    "simple",
+    "configurable"
+  ],
+  "author": "Fredrik <evoozer@gmail.com>",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "66149744a3ec50d4507b27ad9d99dba4df553e69"
+}
