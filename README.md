@@ -18,40 +18,42 @@ variant of iscaas cluster-master module that allows more customzation.
 #Usage:
 
 ```
-    var ncCluster = require('nc-cluster');
+var ncCluster = require('nc-cluster');
 
-    // (optional)
-    ncCluster.concurrency({
-      min: 2,
-      max: 4  
-    });
+// (optional)
+ncCluster.concurrency({
+  min: 2,
+  max: 4  
+});
 
-    // (optional)
-    ncCluster.worker({
-      shutdownTime: 5000 // ms to do a graceful shutdown before automatically killed by force.
-    });
+// (optional)
+ncCluster.worker({
+  shutdownTime: 5000 // ms to do a graceful shutdown before automatically killed by force.
+});
         
-    // (required)
-    ncCluster.init({
-      exec: __dirname + '/worker.js'
-    });
+// (required)
+ncCluster.init({
+  exec: __dirname + '/worker.js'
+});
 
-    // (optional)
-    ncCluster.restart();
+// (optional)
+ncCluster.restart();
 
-    // (optional)
-    ncCluster.quit();
-
+// (optional)
+ncCluster.quit();
+´´´
 
 #Installation:
 
 ```
-    npm install nc-cluster
+npm install nc-cluster
+´´´
 
 #Test:
 Within the nc-cluster folder, type:
 ```
-    npm test
+npm test
+´´´
 
 #Reference
 
@@ -132,11 +134,12 @@ Even it may overwrite the internal event handler, is it safe to call it from cli
 ###.id() Return [worker ID]
 Return worker ID. Same id will be used as the key in the inbuilt cluster module:
 
-´´´
-    var id = worker.id(),
-        inbuiltWorker = require('cluster').workers[id];
+```
+var id = worker.id(),
+    inbuiltWorker = require('cluster').workers[id];
 
-    //inbuiltWorker.send, inbuiltWorker.on('message) or what you may want.
+//inbuiltWorker.send, inbuiltWorker.on('message) or what you may want.
+´´´
 
 #License
 Copyright (c) Fredrik Olofsson ("Author")
