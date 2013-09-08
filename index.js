@@ -88,6 +88,12 @@
     },
     onExit: function (cb) {
       this._data._onExit = cb;
+    },
+    id: function () {
+      if (this._worker) {
+        return this._worker.id;
+      }
+      return null;
     }
   };
 
@@ -99,7 +105,6 @@
       },
       worker: {
         //timeout: 1000, //if a worker takes more than [timeout] to response, will it automatically be killed.
-        allocationDelay: 1000, // time in ms between workers will be spawned at minimun
         shutdownTime: 5000 // ms to the worker will be killed by force automatically.
       },
       gc: {
@@ -185,6 +190,28 @@
         }
       }
     },
+    worker: function (options) {
+      //options.force to force a fast resize
+      // add a task queue to utility-methods
+      if (options) {
+        for (var option in options) {
+          if (options.hasOwnProperty(option)) {
+            this._config.worker[option] = options[option];
+          }
+        }
+      }
+    },
+    gc: function (options) {
+      //options.force to force a fast resize
+      // add a task queue to utility-methods
+      if (options) {
+        for (var option in options) {
+          if (options.hasOwnProperty(option)) {
+            this._config.gc[option] = options[option];
+          }
+        }
+      }
+    },
     restart: function restart(options) {
       //options.force to force a fast restart
       options = options || {};
@@ -205,44 +232,6 @@
     workers: function () {
       return this._workers.concat([]);
     }
-
-    /*,
-    
-    minimumWorkers: function(num) {
-      if(typeof num === 'undefined') {
-        return this._config.worker.min;
-      }
-      this._config.worker.min = num;
-      return this;
-    },
-    maximumWorkers: function (num) {
-      if (typeof num === 'undefined') {
-        return this._config.worker.max;
-      }
-      this._config.worker.max = num;
-      return this;
-    },
-    workerAllocationTimeout: function (num) {
-      if (typeof num === 'undefined') {
-        return this._config.worker.allocationTimeout;
-      }
-      this._config.worker.allocationTimeout = num;
-      return this;
-    },
-    workerAllocationDelay: function (num) {
-      if (typeof num === 'undefined') {
-        return this._config.worker.allocationDelay;
-      }
-      this._config.worker.allocationDelay = num;
-      return this;
-    },
-    workerListeningExpected: function (num) {
-      if (typeof num === 'undefined') {
-        return !!this._config.worker.listeningEventExpected;
-      }
-      this._config.worker.listeningEventExpected = !!num;
-      return this;
-    }*/
   };
   
   
