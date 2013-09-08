@@ -2,6 +2,7 @@
   var utility = require('utility-methods');
 
   function Worker() {
+    //console.log('worker spawned');
     var worker = require('cluster').fork();
 
     worker.on('online', this._onlineEvent.bind(this));
@@ -10,15 +11,14 @@
     worker.on('exit', this._exitEvent.bind(this));
     this._worker = worker;
     this._data = {
-      created: 0
+      created: new Date().getTime()
     };
   }
 
   Worker.prototype = {
     _onlineEvent: function () {
-      console.log('online event');
+      //console.log('online event');
       this._data.online = true;
-      this._data.created = new Date().getTime();
       var cb = this._data.onOnline;
       return (cb && cb());
     },
@@ -57,8 +57,11 @@
     kill: function(ms) {
       var worker = this._worker;
       if(ms === 0) { //hhihi
+        //console.log('worker killed immediately.');
         worker.kill();
+
       } else {
+        //console.log('worker gracefully killed.');
         var cb = utility.createTimedHandler(ms, function (err) {
           worker.kill();
         });
@@ -109,10 +112,11 @@
 
   Cluster.prototype = {
     _gc: function () {
-      console.log('GC()');
+      //console.log('GC()');
       var workersAlive = [],
           config = this._config,
-          restart = this._data.restart;
+          restart = this._data.restart,
+          killCount = 0;
 
       this._workers.forEach(function (worker) {
         if (!worker.isAlive()) {
@@ -121,13 +125,16 @@
         if (!worker.isOnline() && config.worker.timeout < worker.uptime()) {
           // worker is not responding
           worker.kill(0);
+          ++killCount;
           return;
         }
         if(restart) {
           var maxUptime = (new Date().getTime()) - restart.initialized;
           if (maxUptime <= worker.uptime()) {
-            var ms = restart.force ? 0 : config.worker.shutdownTime; 
+            var ms = restart.force ? 0 : config.worker.shutdownTime;
+            //console.log('ms: ' + ms);
             worker.kill(ms);
+            ++killCount;
             restart = null; // gc() will be re-run automatically when worker dies to setup a new worker anyways.
             return;
           }
@@ -145,9 +152,10 @@
         worker.onOnline(gc);
         workersAlive.push(worker);
       }
-      else if(config.concurrency.max < workersAlive.length) {
+      else if(killCount === 0 && config.concurrency.max < workersAlive.length) {
         var worker = workersAlive.shift();
-        if(worker) {
+        if (worker) {
+          //console.log('concurrency.max < workersAlive.length, ms: ' + 0);
           worker.kill(config.worker.shutdownTime);
         }
       }
