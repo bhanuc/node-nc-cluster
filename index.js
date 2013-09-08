@@ -1,9 +1,8 @@
 ﻿module.exports = (function () {
-  var utility = require('utility-methods'),
-      cluster = require('cluster');
+  var utility = require('utility-methods');
 
   function Worker() {
-    var worker = cluster.fork();
+    var worker = require('cluster').fork();
 
     worker.on('online', this._onlineEvent.bind(this));
     worker.on('listening', this._listeningEvent.bind(this));
@@ -17,6 +16,7 @@
 
   Worker.prototype = {
     _onlineEvent: function () {
+      console.log('online event');
       this._data.online = true;
       this._data.created = new Date().getTime();
       var cb = this._data.onOnline;
@@ -56,8 +56,16 @@
     },
     kill: function(ms) {
       var worker = this._worker;
-      worker.kill(); //after [ms] ms should the process be force to exit, but we does not implement it yet.
-      this._worker = null;
+      if(ms === 0) { //hhihi
+        worker.kill();
+      } else {
+        var cb = utility.createTimedHandler(ms, function (err) {
+          worker.kill();
+        });
+        worker.once('disconnect', cb);
+        worker.disconnect();
+      }
+     this._worker = null;
     },
     uptime: function () {
       var uptime = this._data.created;
@@ -67,25 +75,20 @@
       return uptime;
     },
     onOnline: function(cb) {
-      this.data._onOnline = cb;
+      this._data.onOnline = cb;
     },
     onListening: function(cb) {
-      this.data._onListening = cb;
+      this._data._onListening = cb;
     },
     onDisconnected: function(cb) {
-      this.data._onDisconnected = cb;
+      this._data._onDisconnected = cb;
     },
     onExit: function (cb) {
-      this.data._onExit = cb;
+      this._data._onExit = cb;
     }
   };
 
   function Cluster() {
-    var cluster = require('cluster'),
-        utility = require('utility-methods');
-
-    this._cluster = cluster;
-    this._utility = utility;
     this._config = {
       concurrency: {
         min: 1, //Allways [min] workers online.
@@ -101,16 +104,12 @@
       }
     };
     this._data = {};
+    this._workers = [];
   }
 
   Cluster.prototype = {
-    _malloc: function(cb) {
-      var worker = new Worker(),
-          utility = this._utility;
-
-      createTimedHandler(this._config)
-    },
-    _gc: function() {
+    _gc: function () {
+      console.log('GC()');
       var workersAlive = [],
           config = this._config,
           restart = this._data.restart;
@@ -125,7 +124,7 @@
           return;
         }
         if(restart) {
-          var maxUptime = (new Date().getTime()) - this._data.restart.initialized;
+          var maxUptime = (new Date().getTime()) - restart.initialized;
           if (maxUptime <= worker.uptime()) {
             var ms = restart.force ? 0 : config.worker.shutdownTime; 
             worker.kill(ms);
@@ -133,20 +132,21 @@
             return;
           }
         }
-
-        //if(this._data.restart = options;
         workersAlive.push(worker);
       });
+
       if (restart) {
         this._data.restart = null;
       }
       if (workersAlive.length < config.concurrency.min) {
-        var worker = new Worker();
-        worker.onExit(this._gc.bind(this));
+        var worker = new Worker(),
+            gc = this._gc.bind(this);
+        worker.onExit(gc);
+        worker.onOnline(gc);
         workersAlive.push(worker);
       }
       else if(config.concurrency.max < workersAlive.length) {
-        var worker = workersAlive.unshift();
+        var worker = workersAlive.shift();
         if(worker) {
           worker.kill(config.worker.shutdownTime);
         }
@@ -155,9 +155,9 @@
       this._workers = workersAlive;
     },
 
-    init: function (options, cb) {
+    init: function (options) {
       //options.force to force a fast restart
-      cluster.setupMaster(options);
+      require('cluster').setupMaster(options);
       var self = this;
       
       function runGC() {
@@ -172,7 +172,7 @@
       if (options) {
         for (var option in options) {
           if (options.hasOwnProperty(option)) {
-            this._config.concurrency[option] = options[options];
+            this._config.concurrency[option] = options[option];
           }
         }
       }
@@ -190,7 +190,14 @@
         max: 0
       });
       return this.restart(options);
+    },
+    size: function (options) {
+      return this._workers.length;
+    },
+    workers: function () {
+      return this._workers.concat([]);
     }
+
     /*,
     
     minimumWorkers: function(num) {
