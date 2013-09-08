@@ -15,14 +15,29 @@ describe('nc-cluster', function () {
   it('should implement quit', function () {
     assert.equal(typeof cluster.quit, 'function');
   });
-  /*
-  describe('#indexOf()', function () {
+  it('should implement size', function () {
+    assert.equal(typeof cluster.size, 'function');
+  });
+  it('should implement size', function () {
+    assert.equal(typeof cluster.size, 'function');
+  });
+
+
+  describe('functionality', function () {
     before(function (done) {
-      cluster.init();
+      cluster.init({
+        exec: "worker.js",
+        silent: true
+      }, done);
     });
-    it('should return -1 when the value is not present', function () {
-      assert.equal(-1, [1, 2, 3].indexOf(5));
-      assert.equal(-1, [1, 2, 3].indexOf(0));
-    })
-  })*/
-})
+    after(function (done) {
+      cluster.quit({
+        force: true
+      }, done);
+    });
+    it('test', function () {
+
+    });
+  });
+});
+
