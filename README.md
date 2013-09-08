@@ -17,7 +17,7 @@ variant of iscaas cluster-master module that allows more customzation.
 
 #Usage:
 
-```
+```JavaScript
 var ncCluster = require('nc-cluster');
 
 // (optional)
@@ -41,19 +41,19 @@ ncCluster.restart();
 
 // (optional)
 ncCluster.quit();
-´´´
+```
 
 #Installation:
 
 ```
 npm install nc-cluster
-´´´
+```
 
 #Test:
 Within the nc-cluster folder, type:
 ```
 npm test
-´´´
+```
 
 #Reference
 
@@ -139,7 +139,7 @@ var id = worker.id(),
     inbuiltWorker = require('cluster').workers[id];
 
 //inbuiltWorker.send, inbuiltWorker.on('message) or what you may want.
-´´´
+```
 
 #License
 Copyright (c) Fredrik Olofsson ("Author")
