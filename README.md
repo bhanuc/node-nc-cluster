@@ -8,54 +8,50 @@ variant of iscaas cluster-master module that allows more customzation.
 
 - Configuration/Customzation. Multiple configurations and easily to add more.
 
-- Does not interfeir with others libraries. If you fork other workers processes
-  outside the nc-cluster library, will it not kill or destroy any worker that has
-  not been forked by the library itself.
+- Does not interfeir with others libraries. You can safely use libraries that
+  take advantage of the cluster module to as lon the never call
+  require('cluster').setupMaster method.
 
-- Monitor. The library will auto respawn dead workers and may choice to allocate more
-  workers up to concurrency.max) when the system is busy and decrease it when the system
-  is mostly idle.
+- Monitor. The library will monitor the system and respawn, increase and decrease
+  the number of workers depending of the resource usage.
 
 #Usage:
 
 ```
-        var ncCluster = require('nc-cluster');
+    var ncCluster = require('nc-cluster');
 
-        // (optional)
-        ncCluster.concurrency({
-          min: 2,
-          max: 4  
-        });
+    // (optional)
+    ncCluster.concurrency({
+      min: 2,
+      max: 4  
+    });
 
-        // (optional)
-        ncCluster.worker({
-          shutdownTime: 5000 // ms to do a graceful shutdown before automatically killed by force.
-        });
+    // (optional)
+    ncCluster.worker({
+      shutdownTime: 5000 // ms to do a graceful shutdown before automatically killed by force.
+    });
         
-        // (required)
-        ncCluster.init({
-          exec: __dirname + '/worker.js'
-        });
+    // (required)
+    ncCluster.init({
+      exec: __dirname + '/worker.js'
+    });
 
-        // (optional)
-        ncCluster.restart();
+    // (optional)
+    ncCluster.restart();
 
-        // (optional)
-        ncCluster.quit();
-´´´
+    // (optional)
+    ncCluster.quit();
 
 
 #Installation:
 
 ```
-        npm install nc-cluster
-´´´
+    npm install nc-cluster
 
 #Test:
 Within the nc-cluster folder, type:
 ```
-        npm test
-´´´
+    npm test
 
 #Reference
 
@@ -136,10 +132,11 @@ Even it may overwrite the internal event handler, is it safe to call it from cli
 ###.id() Return [worker ID]
 Return worker ID. Same id will be used as the key in the inbuilt cluster module:
 
-var id = worker.id(),
-    inbuiltWorker = require('cluster').workers[id];
+´´´
+    var id = worker.id(),
+        inbuiltWorker = require('cluster').workers[id];
 
-//inbuiltWorker.send, inbuiltWorker.on('message) or what you may want.
+    //inbuiltWorker.send, inbuiltWorker.on('message) or what you may want.
 
 #License
 Copyright (c) Fredrik Olofsson ("Author")
